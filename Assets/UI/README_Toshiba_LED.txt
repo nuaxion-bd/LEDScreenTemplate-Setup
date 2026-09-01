@@ -19,11 +19,11 @@ the original Assets/Scenes/Main.unity. It moves the existing Boxing UI into the
 capture stage, keeps UIManager references, and disables the old separate UI stretch.
 
 This creates three internal-design tests:
-- 608 x 1080 -> stretched to 1920 x 1080 output
-- 640 x 1920 -> stretched to 1920 x 1080 output
-- 1920 x 1080 -> normal 1:1 1920 x 1080 output
+- LEDTemplateTest_608x1080.unity -> stretched to 1920 x 1080 output
+- LEDTemplateTest_640x1920.unity -> stretched to 1920 x 1080 output
+- LEDTemplateTest_1920x1080.unity -> normal 1:1 1920 x 1080 output
 
-Open either generated scene and press Play to view the final HDMI output.
+Open any generated scene and press Play to view its final HDMI output.
 Use Tools > Toshiba LED > Open LED Preview to compare each original design
 with its 1920 x 1080 HDMI output. The normal template is not distorted.
 
@@ -34,5 +34,4 @@ Do not place game UI under OutputCanvas. OutputCanvas is reserved for displaying
 the completed Render Texture across the final Windows display.
 
 The included TestBackground.png remains inside the capture stage. Its centered
-608-pixel or 640-pixel strip is selected for the matching template; the areas
-labelled DO NOT SHOW are excluded before the final stretch.
+608-pixel, 640-pixel, or 1920-pixel area is selected for the matching template.

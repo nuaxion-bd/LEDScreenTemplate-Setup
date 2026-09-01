@@ -12,7 +12,7 @@ EditorBuildSettings:
     path: Assets/Scenes/LEDTemplateTest_640x1920.unity
     guid: c2da236d435f03c4cbcedd9f4e367fb9
   - enabled: 1
-    path: Assets/Scenes/LEDTemplateTest.unity
+    path: Assets/Scenes/LEDTemplateTest_608x1080.unity
     guid: aa4326969f4df2447844527cf78a2308
   - enabled: 1
     path: Assets/Scenes/SampleScene.unity

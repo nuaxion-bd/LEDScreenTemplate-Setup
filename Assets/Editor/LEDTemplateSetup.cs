@@ -16,7 +16,8 @@ public static class LEDTemplateSetup
     public const int NativeDesignWidth = 1920;
     public const int NativeDesignHeight = 1080;
 
-    public const string ScenePath = "Assets/Scenes/LEDTemplateTest.unity";
+    public const string ScenePath = "Assets/Scenes/LEDTemplateTest_608x1080.unity";
+    public const string LegacyScenePath = "Assets/Scenes/LEDTemplateTest.unity";
     public const string RenderTexturePath = "Assets/RenderTextures/LED_Output.renderTexture";
     public const string TallScenePath = "Assets/Scenes/LEDTemplateTest_640x1920.unity";
     public const string TallRenderTexturePath = "Assets/RenderTextures/LED_Output_640x1920.renderTexture";
@@ -25,10 +26,10 @@ public static class LEDTemplateSetup
     public const string TestBackgroundPath = "Assets/UI/TestBackground.png";
     public const string BoxingSourceScenePath = "Assets/Scenes/Main.unity";
     public const string BoxingIntegratedScenePath = "Assets/Scenes/Main_LED_640x1920.unity";
-    public const string SharingPackagePath = "Exports/Toshiba_LED_Template_v4.unitypackage";
+    public const string SharingPackagePath = "Exports/Toshiba_LED_Template_v5.unitypackage";
     private const string BoxingLayoutRequestPath = "Temp/ToshibaApplyUILayout.request";
 
-    [MenuItem("Tools/Toshiba LED/Export Sharing Package (v4)")]
+    [MenuItem("Tools/Toshiba LED/Export Sharing Package (v5)")]
     public static void ExportSharingPackage()
     {
         string projectRoot = Directory.GetParent(Application.dataPath).FullName;
@@ -176,6 +177,11 @@ public static class LEDTemplateSetup
         if (askToSave && !Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
         {
             return;
+        }
+
+        if (scenePath == ScenePath)
+        {
+            MigrateLegacy608SceneIfNeeded();
         }
 
         EnsureAssetFolders();
@@ -1134,7 +1140,7 @@ public static class LEDTemplateSetup
 
         foreach (EditorBuildSettingsScene oldScene in oldScenes)
         {
-            if (oldScene.path == scenePath)
+            if (oldScene.path == scenePath || oldScene.path == LegacyScenePath)
             {
                 continue;
             }
@@ -1148,6 +1154,25 @@ public static class LEDTemplateSetup
         }
 
         EditorBuildSettings.scenes = newScenes;
+    }
+
+    private static void MigrateLegacy608SceneIfNeeded()
+    {
+        if (File.Exists(ScenePath) || !File.Exists(LegacyScenePath))
+        {
+            return;
+        }
+
+        string error = AssetDatabase.MoveAsset(LegacyScenePath, ScenePath);
+        if (!string.IsNullOrEmpty(error))
+        {
+            throw new IOException(
+                $"Could not rename the legacy 608x1080 scene from {LegacyScenePath} to {ScenePath}: {error}");
+        }
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        Debug.Log($"Renamed the legacy 608x1080 scene to {ScenePath}.");
     }
 
     private static GameObject GetOrCreateRoot(Scene scene, string objectName)
