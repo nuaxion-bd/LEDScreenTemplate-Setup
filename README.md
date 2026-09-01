@@ -1,6 +1,6 @@
 # Toshiba LED Screen Template
 
-Unity 6 URP template for producing the deliberately stretched HDMI signal used by the specialised Toshiba LED screen.
+Unity 6 URP template for producing either the deliberately stretched HDMI signal used by the specialised Toshiba LED screen or a normal 1920 x 1080 output.
 
 The recommended current setup is:
 
@@ -22,6 +22,21 @@ Stretched without preserving aspect ratio
 
 The image will look extremely wide on a normal 1920 x 1080 monitor. That distortion is intentional. The Toshiba hardware maps that signal onto its physical LED display.
 
+A separate normal template is also included:
+
+```text
+1920 x 1080 internal design
+            |
+            v
+Complete scene and UI captured together
+            |
+            v
+1920 x 1080 Render Texture
+            |
+            v
+1920 x 1080 Windows / HDMI output (no distortion)
+```
+
 ## Requirements
 
 - Unity Hub
@@ -33,14 +48,14 @@ The image will look extremely wide on a normal 1920 x 1080 monitor. That distort
 
 ### Import the package into an existing Unity project
 
-Download [Toshiba_LED_Template_v3.unitypackage](Exports/Toshiba_LED_Template_v3.unitypackage) from this repository. In the destination Unity project:
+Download [Toshiba_LED_Template_v4.unitypackage](Exports/Toshiba_LED_Template_v4.unitypackage) from this repository. In the destination Unity project:
 
 1. Make a backup or Git commit of the project.
 2. Select **Assets > Import Package > Custom Package**.
-3. Select `Toshiba_LED_Template_v3.unitypackage`.
+3. Select `Toshiba_LED_Template_v4.unitypackage`.
 4. Leave all included files selected and choose **Import**.
 5. Wait for Unity to finish compiling.
-6. Select **Tools > Toshiba LED > Create Templates > Create Both Templates**.
+6. Select **Tools > Toshiba LED > Create Templates > Create All Templates**.
 
 The package contains the setup tool, test background, and UI instructions. The menu command creates the scenes and Render Textures inside the destination project.
 
@@ -73,18 +88,23 @@ You do not need to close Unity after opening the project. If a menu command has 
 
 In Unity's top menu, select:
 
-**Tools > Toshiba LED > Create Templates > Create Both Templates**
+**Tools > Toshiba LED > Create Templates > Create All Templates**
 
-This safely creates or refreshes both available tests:
+This safely creates or refreshes all available tests:
 
 - `Assets/Scenes/LEDTemplateTest_640x1920.unity` - recommended current Toshiba design.
 - `Assets/Scenes/LEDTemplateTest.unity` - original 608 x 1080 test.
+- `Assets/Scenes/LEDTemplateTest_1920x1080.unity` - normal Full HD design with no distortion.
 
 The command is safe to run again. It updates the existing assets instead of creating duplicate cameras, canvases, or render textures.
 
 To create only the current portrait version, use:
 
 **Tools > Toshiba LED > Create Templates > Create 640x1920 Template**
+
+To create only the normal Full HD version, use:
+
+**Tools > Toshiba LED > Create Templates > Create 1920x1080 Normal Template**
 
 ## 3. Open the recommended test scene
 
@@ -107,6 +127,8 @@ OutputCanvas
 
 Everything under `CaptureCanvas` is composed into the portrait Render Texture first. `OutputRawImage` then stretches that completed image across the Windows display.
 
+For the normal template, open `Assets/Scenes/LEDTemplateTest_1920x1080.unity` or select **Tools > Toshiba LED > Open 1920x1080 Normal Test Scene**. It uses the same hierarchy, but its completed 1920 x 1080 Render Texture maps to the output 1:1.
+
 ## 4. Test the final HDMI output in Game mode
 
 Yes, use Game mode to test the final output:
@@ -125,6 +147,8 @@ Expected result on a normal monitor:
 
 This stretched appearance is correct. Do not enable **Preserve Aspect** on `OutputRawImage` and do not add an Aspect Ratio Fitter to it.
 
+When testing `LEDTemplateTest_1920x1080.unity`, the scene should fill the Game view with normal proportions and no distortion.
+
 Press **Play** again to stop Game mode before editing objects. Changes made while Unity is playing are normally discarded when Play mode stops.
 
 ## 5. View the unstretched design while editing
@@ -135,9 +159,9 @@ Select:
 
 In the preview window:
 
-1. Select **640x1920** as the template source.
+1. Select **608x1080**, **640x1920**, or **1920x1080** as the template source.
 2. Select **Design proportions** to inspect the original portrait composition.
-3. Select **HDMI 1920x1080** to inspect the deliberately stretched output.
+3. Select **HDMI 1920x1080** to inspect the final output. Portrait sources are distorted; the normal source is not.
 4. Leave **Auto refresh** enabled while adjusting UI, or select **Refresh capture** manually.
 
 The preview window is editor-only. It does not change the production Render Texture or Windows output.
@@ -164,6 +188,10 @@ Do not use a separate Screen Space Overlay canvas for game UI. Overlay UI would 
 
 ## 7. Validate the setup
 
+To check every resolution after creating all templates, select:
+
+**Tools > Toshiba LED > Validate Templates > Validate All Templates**
+
 For the recommended template, select:
 
 **Tools > Toshiba LED > Validate Templates > Validate 640x1920 Template**
@@ -174,25 +202,31 @@ The original template can be checked with:
 
 **Tools > Toshiba LED > Validate Templates > Validate 608x1080 Template**
 
+The normal Full HD template can be checked with:
+
+**Tools > Toshiba LED > Validate Templates > Validate 1920x1080 Normal Template**
+
 Validation proves the Unity rendering architecture. It does not verify the final mapping on the physical Toshiba LED hardware.
 
 ## 8. Create a Windows build
 
-1. Open `LEDTemplateTest_640x1920.unity`.
+1. Open the scene you want to build: `LEDTemplateTest_640x1920.unity` for the Toshiba portrait mapping, or `LEDTemplateTest_1920x1080.unity` for normal Full HD output.
 2. Select **File > Build Profiles**.
 3. Select **Windows**.
 4. If required, select **Switch Platform**.
 5. Confirm the architecture is **Intel 64-bit / x86-64**.
-6. Confirm `LEDTemplateTest_640x1920` is enabled and first in the scene list.
+6. Confirm your selected test scene is enabled and first in the scene list.
 7. Select **Build**.
 8. Choose a new folder outside the Unity project's `Assets` folder, such as `Builds/ToshibaLEDTest`.
 9. Run the generated `.exe` on the computer connected to the Toshiba screen by HDMI.
 
 The project is configured for a 1920 x 1080 fullscreen window. The internal Render Texture remains 640 x 1920.
 
+If you build `LEDTemplateTest_1920x1080.unity` instead, both the internal Render Texture and final Windows output are 1920 x 1080. Creating a template configures the correct player resolution, but Unity does not build an `.exe` automatically; you still choose **Build** when you are ready.
+
 ## 9. Use the setup in the Boxing project
 
-The easiest method is to import `Exports/Toshiba_LED_Template_v3.unitypackage` using **Assets > Import Package > Custom Package**.
+The easiest method is to import `Exports/Toshiba_LED_Template_v4.unitypackage` using **Assets > Import Package > Custom Package**.
 
 Alternatively, make a backup or Git commit of the Boxing project, then copy these template files into its matching folders:
 
@@ -250,6 +284,6 @@ Move it under `CaptureCanvas > GameUI`. It must be captured by `CaptureCamera` b
 
 After changing the setup tool or included UI files, select:
 
-**Tools > Toshiba LED > Export Sharing Package (v3)**
+**Tools > Toshiba LED > Export Sharing Package (v4)**
 
-Unity recreates `Exports/Toshiba_LED_Template_v3.unitypackage` from the current source files.
+Unity recreates `Exports/Toshiba_LED_Template_v4.unitypackage` from the current source files.

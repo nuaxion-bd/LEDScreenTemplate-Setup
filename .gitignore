@@ -80,6 +80,7 @@ mono_crash.*
 # Keep the current Toshiba LED sharing package in this repository.
 !/Exports/
 !/Exports/Toshiba_LED_Template_v3.unitypackage
+!/Exports/Toshiba_LED_Template_v4.unitypackage
 
 # Crashlytics generated file
 crashlytics-build.properties

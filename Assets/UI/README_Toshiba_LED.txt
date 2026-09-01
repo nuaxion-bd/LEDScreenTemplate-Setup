@@ -6,7 +6,7 @@ Requirements:
 - Unity UI (uGUI)
 
 After importing this package, run:
-Tools > Toshiba LED > Create Templates > Create Both Templates
+Tools > Toshiba LED > Create Templates > Create All Templates
 
 For the Boxing-AR-main project specifically, run:
 Tools > Toshiba LED > Integrate Boxing Main Scene (640x1920)
@@ -18,13 +18,14 @@ That command creates Assets/Scenes/Main_LED_640x1920.unity without modifying
 the original Assets/Scenes/Main.unity. It moves the existing Boxing UI into the
 capture stage, keeps UIManager references, and disables the old separate UI stretch.
 
-This creates two internal-design tests:
+This creates three internal-design tests:
 - 608 x 1080 -> stretched to 1920 x 1080 output
 - 640 x 1920 -> stretched to 1920 x 1080 output
+- 1920 x 1080 -> normal 1:1 1920 x 1080 output
 
 Open either generated scene and press Play to view the final HDMI output.
-Use Tools > Toshiba LED > Open LED Preview to compare the original design
-proportions with the stretched 1920 x 1080 output.
+Use Tools > Toshiba LED > Open LED Preview to compare each original design
+with its 1920 x 1080 HDMI output. The normal template is not distorted.
 
 Place future game UI under:
 CaptureCanvas > GameUI

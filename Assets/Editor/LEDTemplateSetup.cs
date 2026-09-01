@@ -13,18 +13,22 @@ public static class LEDTemplateSetup
     public const int TallDesignHeight = 1920;
     public const int OutputWidth = 1920;
     public const int OutputHeight = 1080;
+    public const int NativeDesignWidth = 1920;
+    public const int NativeDesignHeight = 1080;
 
     public const string ScenePath = "Assets/Scenes/LEDTemplateTest.unity";
     public const string RenderTexturePath = "Assets/RenderTextures/LED_Output.renderTexture";
     public const string TallScenePath = "Assets/Scenes/LEDTemplateTest_640x1920.unity";
     public const string TallRenderTexturePath = "Assets/RenderTextures/LED_Output_640x1920.renderTexture";
+    public const string NativeScenePath = "Assets/Scenes/LEDTemplateTest_1920x1080.unity";
+    public const string NativeRenderTexturePath = "Assets/RenderTextures/LED_Output_1920x1080.renderTexture";
     public const string TestBackgroundPath = "Assets/UI/TestBackground.png";
     public const string BoxingSourceScenePath = "Assets/Scenes/Main.unity";
     public const string BoxingIntegratedScenePath = "Assets/Scenes/Main_LED_640x1920.unity";
-    public const string SharingPackagePath = "Exports/Toshiba_LED_Template_v3.unitypackage";
+    public const string SharingPackagePath = "Exports/Toshiba_LED_Template_v4.unitypackage";
     private const string BoxingLayoutRequestPath = "Temp/ToshibaApplyUILayout.request";
 
-    [MenuItem("Tools/Toshiba LED/Export Sharing Package (v3)")]
+    [MenuItem("Tools/Toshiba LED/Export Sharing Package (v4)")]
     public static void ExportSharingPackage()
     {
         string projectRoot = Directory.GetParent(Application.dataPath).FullName;
@@ -111,8 +115,19 @@ public static class LEDTemplateSetup
             "LED_Output_640x1920");
     }
 
-    [MenuItem("Tools/Toshiba LED/Create Templates/Create Both Templates")]
-    public static void CreateBothTemplates()
+    [MenuItem("Tools/Toshiba LED/Create Templates/Create 1920x1080 Normal Template")]
+    public static void CreateNativeTestTemplate()
+    {
+        CreateTemplate(
+            NativeDesignWidth,
+            NativeDesignHeight,
+            NativeScenePath,
+            NativeRenderTexturePath,
+            "LED_Output_1920x1080");
+    }
+
+    [MenuItem("Tools/Toshiba LED/Create Templates/Create All Templates")]
+    public static void CreateAllTemplates()
     {
         if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
         {
@@ -127,14 +142,27 @@ public static class LEDTemplateSetup
             TallRenderTexturePath,
             "LED_Output_640x1920",
             false);
+        CreateTemplate(
+            NativeDesignWidth,
+            NativeDesignHeight,
+            NativeScenePath,
+            NativeRenderTexturePath,
+            "LED_Output_1920x1080",
+            false);
 
         if (!Application.isBatchMode)
         {
             EditorUtility.DisplayDialog(
                 "Toshiba LED Templates",
-                "Both 608x1080 and 640x1920 templates are ready.",
+                "The 608x1080, 640x1920, and normal 1920x1080 templates are ready.",
                 "OK");
         }
+    }
+
+    [MenuItem("Tools/Toshiba LED/Create Templates/Create Both Templates")]
+    public static void CreateBothTemplates()
+    {
+        CreateAllTemplates();
     }
 
     private static void CreateTemplate(
@@ -172,16 +200,19 @@ public static class LEDTemplateSetup
         AssetDatabase.Refresh();
         Selection.activeObject = AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath);
 
+        bool nativeOutput = designWidth == OutputWidth && designHeight == OutputHeight;
         Debug.Log(
-            $"Toshiba LED test template created. The complete {designWidth}x{designHeight} capture is stretched to the " +
-            "1920x1080 output without preserving aspect ratio.");
+            nativeOutput
+                ? "Toshiba LED normal template created. The complete 1920x1080 capture maps 1:1 to the 1920x1080 output."
+                : $"Toshiba LED test template created. The complete {designWidth}x{designHeight} capture is stretched to the " +
+                  "1920x1080 output without preserving aspect ratio.");
 
         if (askToSave && !Application.isBatchMode)
         {
             EditorUtility.DisplayDialog(
                 "Toshiba LED Template",
                 $"{Path.GetFileNameWithoutExtension(scenePath)} is ready.\n\n" +
-                "Use Tools > Toshiba LED > Open LED Preview to compare the portrait design and stretched HDMI output.",
+                "Use Tools > Toshiba LED > Open LED Preview to compare the internal design and HDMI output.",
                 "OK");
         }
     }
@@ -207,6 +238,12 @@ public static class LEDTemplateSetup
     public static void OpenTallTestScene()
     {
         OpenOrCreateSceneFromMenu(TallScenePath, CreateTallTestTemplate);
+    }
+
+    [MenuItem("Tools/Toshiba LED/Open 1920x1080 Normal Test Scene")]
+    public static void OpenNativeTestScene()
+    {
+        OpenOrCreateSceneFromMenu(NativeScenePath, CreateNativeTestTemplate);
     }
 
     private static void OpenOrCreateSceneFromMenu(string scenePath, System.Action createAction)
@@ -934,10 +971,24 @@ public static class LEDTemplateSetup
         ValidateTemplate(DesignWidth, DesignHeight, ScenePath, RenderTexturePath);
     }
 
+    [MenuItem("Tools/Toshiba LED/Validate Templates/Validate All Templates")]
+    public static void ValidateAllTemplates()
+    {
+        ValidateTemplate(DesignWidth, DesignHeight, ScenePath, RenderTexturePath);
+        ValidateTemplate(TallDesignWidth, TallDesignHeight, TallScenePath, TallRenderTexturePath);
+        ValidateTemplate(NativeDesignWidth, NativeDesignHeight, NativeScenePath, NativeRenderTexturePath);
+    }
+
     [MenuItem("Tools/Toshiba LED/Validate Templates/Validate 640x1920 Template")]
     public static void ValidateTallTestTemplate()
     {
         ValidateTemplate(TallDesignWidth, TallDesignHeight, TallScenePath, TallRenderTexturePath);
+    }
+
+    [MenuItem("Tools/Toshiba LED/Validate Templates/Validate 1920x1080 Normal Template")]
+    public static void ValidateNativeTestTemplate()
+    {
+        ValidateTemplate(NativeDesignWidth, NativeDesignHeight, NativeScenePath, NativeRenderTexturePath);
     }
 
     private static void ValidateTemplate(
@@ -1025,10 +1076,20 @@ public static class LEDTemplateSetup
 
         if (failures == 0)
         {
-            float horizontalScale = (float)OutputWidth / designWidth;
-            Debug.Log(
-                $"Toshiba LED {resolution} template validation passed. The frame is intentionally stretched " +
-                $"to 1920x1080 ({horizontalScale:0.####}x horizontal scale). Physical LED verification is still required on-site.");
+            bool nativeOutput = designWidth == OutputWidth && designHeight == OutputHeight;
+            if (nativeOutput)
+            {
+                Debug.Log(
+                    "Toshiba LED 1920x1080 normal template validation passed. The internal frame maps 1:1 to the " +
+                    "1920x1080 Windows output. Physical LED verification is still required on-site.");
+            }
+            else
+            {
+                float horizontalScale = (float)OutputWidth / designWidth;
+                Debug.Log(
+                    $"Toshiba LED {resolution} template validation passed. The frame is intentionally stretched " +
+                    $"to 1920x1080 ({horizontalScale:0.####}x horizontal scale). Physical LED verification is still required on-site.");
+            }
         }
         else
         {
@@ -1176,16 +1237,35 @@ public sealed class LEDOutputPreviewWindow : EditorWindow
     {
         EditorGUILayout.Space(6f);
         GUILayout.Label("Template source", EditorStyles.boldLabel);
-        sourceMode = GUILayout.Toolbar(sourceMode, new[] { "608x1080", "640x1920" });
+        sourceMode = GUILayout.Toolbar(sourceMode, new[] { "608x1080", "640x1920", "1920x1080" });
         GUILayout.Label("Preview mode", EditorStyles.boldLabel);
         previewMode = GUILayout.Toolbar(previewMode, new[] { "Design proportions", "HDMI 1920x1080" });
 
-        int designWidth = sourceMode == 0 ? LEDTemplateSetup.DesignWidth : LEDTemplateSetup.TallDesignWidth;
-        int designHeight = sourceMode == 0 ? LEDTemplateSetup.DesignHeight : LEDTemplateSetup.TallDesignHeight;
-        string renderTexturePath = sourceMode == 0
-            ? LEDTemplateSetup.RenderTexturePath
-            : LEDTemplateSetup.TallRenderTexturePath;
-        string scenePath = sourceMode == 0 ? LEDTemplateSetup.ScenePath : LEDTemplateSetup.TallScenePath;
+        int designWidth;
+        int designHeight;
+        string renderTexturePath;
+        string scenePath;
+        if (sourceMode == 0)
+        {
+            designWidth = LEDTemplateSetup.DesignWidth;
+            designHeight = LEDTemplateSetup.DesignHeight;
+            renderTexturePath = LEDTemplateSetup.RenderTexturePath;
+            scenePath = LEDTemplateSetup.ScenePath;
+        }
+        else if (sourceMode == 1)
+        {
+            designWidth = LEDTemplateSetup.TallDesignWidth;
+            designHeight = LEDTemplateSetup.TallDesignHeight;
+            renderTexturePath = LEDTemplateSetup.TallRenderTexturePath;
+            scenePath = LEDTemplateSetup.TallScenePath;
+        }
+        else
+        {
+            designWidth = LEDTemplateSetup.NativeDesignWidth;
+            designHeight = LEDTemplateSetup.NativeDesignHeight;
+            renderTexturePath = LEDTemplateSetup.NativeRenderTexturePath;
+            scenePath = LEDTemplateSetup.NativeScenePath;
+        }
 
         using (new EditorGUILayout.HorizontalScope())
         {
@@ -1202,11 +1282,14 @@ public sealed class LEDOutputPreviewWindow : EditorWindow
             }
         }
 
-        EditorGUILayout.HelpBox(
-            previewMode == 0
-                ? $"Portrait composition with the original {designWidth}x{designHeight} proportions."
-                : "Final HDMI simulation. Horizontal distortion is intentional and aspect ratio is not preserved.",
-            MessageType.Info);
+        bool nativeOutput = designWidth == LEDTemplateSetup.OutputWidth &&
+                            designHeight == LEDTemplateSetup.OutputHeight;
+        string previewHelp = previewMode == 0
+            ? $"Internal composition with the original {designWidth}x{designHeight} proportions."
+            : nativeOutput
+                ? "Final HDMI simulation. The normal 1920x1080 template maps to the output without distortion."
+                : "Final HDMI simulation. Distortion is intentional and aspect ratio is not preserved.";
+        EditorGUILayout.HelpBox(previewHelp, MessageType.Info);
 
         RenderTexture texture = AssetDatabase.LoadAssetAtPath<RenderTexture>(renderTexturePath);
         if (texture == null)
