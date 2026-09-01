@@ -31,6 +31,19 @@ The image will look extremely wide on a normal 1920 x 1080 monitor. That distort
 
 ## 1. Download and open the project
 
+### Import the package into an existing Unity project
+
+Download [Toshiba_LED_Template_v3.unitypackage](Exports/Toshiba_LED_Template_v3.unitypackage) from this repository. In the destination Unity project:
+
+1. Make a backup or Git commit of the project.
+2. Select **Assets > Import Package > Custom Package**.
+3. Select `Toshiba_LED_Template_v3.unitypackage`.
+4. Leave all included files selected and choose **Import**.
+5. Wait for Unity to finish compiling.
+6. Select **Tools > Toshiba LED > Create Templates > Create Both Templates**.
+
+The package contains the setup tool, test background, and UI instructions. The menu command creates the scenes and Render Textures inside the destination project.
+
 ### Git method
 
 Clone this repository:
@@ -179,7 +192,9 @@ The project is configured for a 1920 x 1080 fullscreen window. The internal Rend
 
 ## 9. Use the setup in the Boxing project
 
-Make a backup or Git commit of the Boxing project first. Then copy these template files into the matching folders of the Boxing project:
+The easiest method is to import `Exports/Toshiba_LED_Template_v3.unitypackage` using **Assets > Import Package > Custom Package**.
+
+Alternatively, make a backup or Git commit of the Boxing project, then copy these template files into its matching folders:
 
 ```text
 Assets/Editor/LEDTemplateSetup.cs
@@ -230,3 +245,11 @@ Check `OutputCanvas > OutputRawImage`:
 ### UI does not appear in the Render Texture
 
 Move it under `CaptureCanvas > GameUI`. It must be captured by `CaptureCamera` before the final stretch.
+
+## Maintainer: rebuild the sharing package
+
+After changing the setup tool or included UI files, select:
+
+**Tools > Toshiba LED > Export Sharing Package (v3)**
+
+Unity recreates `Exports/Toshiba_LED_Template_v3.unitypackage` from the current source files.

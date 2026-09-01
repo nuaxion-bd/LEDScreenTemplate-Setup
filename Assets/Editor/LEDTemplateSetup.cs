@@ -21,7 +21,40 @@ public static class LEDTemplateSetup
     public const string TestBackgroundPath = "Assets/UI/TestBackground.png";
     public const string BoxingSourceScenePath = "Assets/Scenes/Main.unity";
     public const string BoxingIntegratedScenePath = "Assets/Scenes/Main_LED_640x1920.unity";
+    public const string SharingPackagePath = "Exports/Toshiba_LED_Template_v3.unitypackage";
     private const string BoxingLayoutRequestPath = "Temp/ToshibaApplyUILayout.request";
+
+    [MenuItem("Tools/Toshiba LED/Export Sharing Package (v3)")]
+    public static void ExportSharingPackage()
+    {
+        string projectRoot = Directory.GetParent(Application.dataPath).FullName;
+        string absolutePackagePath = Path.Combine(projectRoot, SharingPackagePath);
+        Directory.CreateDirectory(Path.GetDirectoryName(absolutePackagePath));
+
+        string[] packageAssets =
+        {
+            "Assets/Editor/LEDTemplateSetup.cs",
+            "Assets/UI/TestBackground.png",
+            "Assets/UI/README_Toshiba_LED.txt"
+        };
+
+        foreach (string assetPath in packageAssets)
+        {
+            if (AssetDatabase.LoadMainAssetAtPath(assetPath) == null)
+            {
+                throw new FileNotFoundException(
+                    "Cannot export the Toshiba LED sharing package because an asset is missing.",
+                    assetPath);
+            }
+        }
+
+        AssetDatabase.ExportPackage(
+            packageAssets,
+            absolutePackagePath,
+            ExportPackageOptions.Default);
+
+        Debug.Log("Exported Toshiba LED sharing package to: " + absolutePackagePath);
+    }
 
     [InitializeOnLoadMethod]
     private static void ProcessPendingBoxingLayoutRequest()

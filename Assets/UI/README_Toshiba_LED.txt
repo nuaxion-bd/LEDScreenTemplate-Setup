@@ -11,6 +11,9 @@ Tools > Toshiba LED > Create Templates > Create Both Templates
 For the Boxing-AR-main project specifically, run:
 Tools > Toshiba LED > Integrate Boxing Main Scene (640x1920)
 
+Then run:
+Tools > Toshiba LED > Apply Boxing Portrait UI Layout
+
 That command creates Assets/Scenes/Main_LED_640x1920.unity without modifying
 the original Assets/Scenes/Main.unity. It moves the existing Boxing UI into the
 capture stage, keeps UIManager references, and disables the old separate UI stretch.
