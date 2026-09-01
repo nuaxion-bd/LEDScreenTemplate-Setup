@@ -26,10 +26,12 @@ public static class LEDTemplateSetup
     public const string TestBackgroundPath = "Assets/UI/TestBackground.png";
     public const string BoxingSourceScenePath = "Assets/Scenes/Main.unity";
     public const string BoxingIntegratedScenePath = "Assets/Scenes/Main_LED_640x1920.unity";
-    public const string SharingPackagePath = "Exports/Toshiba_LED_Template_v6.unitypackage";
+    public const string Boxing608ScenePath = "Assets/Scenes/Main_LED_608x1080.unity";
+    public const string BoxingNativeScenePath = "Assets/Scenes/Main_LED_1920x1080.unity";
+    public const string SharingPackagePath = "Exports/Toshiba_LED_Template_v7.unitypackage";
     private const string BoxingLayoutRequestPath = "Temp/ToshibaApplyUILayout.request";
 
-    [MenuItem("Tools/Toshiba LED/Export Sharing Package (v6)")]
+    [MenuItem("Tools/Toshiba LED/Export Sharing Package (v7)")]
     public static void ExportSharingPackage()
     {
         string projectRoot = Directory.GetParent(Application.dataPath).FullName;
@@ -457,6 +459,236 @@ public static class LEDTemplateSetup
         {
             Debug.LogError($"Boxing Toshiba LED integration validation found {failures} problem(s).");
         }
+    }
+
+    [MenuItem("Tools/Toshiba LED/Recreate Boxing Game In All LED Sizes")]
+    public static void RecreateBoxingGameInAllLEDSizes()
+    {
+        if (!File.Exists(BoxingIntegratedScenePath))
+        {
+            Debug.LogError(
+                $"The integrated Boxing master scene was not found at {BoxingIntegratedScenePath}. " +
+                "Run Integrate Boxing Main Scene (640x1920) first.");
+            return;
+        }
+
+        if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+        {
+            return;
+        }
+
+        EnsureAssetFolders();
+        Texture2D testBackground = ConfigureTestBackgroundImport();
+        RenderTexture output608 = CreateOrUpdateRenderTexture(
+            DesignWidth,
+            DesignHeight,
+            RenderTexturePath,
+            "LED_Output");
+        RenderTexture outputNative = CreateOrUpdateRenderTexture(
+            NativeDesignWidth,
+            NativeDesignHeight,
+            NativeRenderTexturePath,
+            "LED_Output_1920x1080");
+
+        CreateBoxingSizeVariant(
+            Boxing608ScenePath,
+            DesignWidth,
+            DesignHeight,
+            output608,
+            testBackground);
+        CreateBoxingSizeVariant(
+            BoxingNativeScenePath,
+            NativeDesignWidth,
+            NativeDesignHeight,
+            outputNative,
+            testBackground);
+
+        AddSceneToBuildSettings(BoxingIntegratedScenePath);
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        EditorSceneManager.OpenScene(BoxingIntegratedScenePath, OpenSceneMode.Single);
+        Selection.activeObject = AssetDatabase.LoadAssetAtPath<SceneAsset>(BoxingIntegratedScenePath);
+
+        Debug.Log(
+            "Recreated the Boxing game and UI at 608x1080, 640x1920, and normal 1920x1080. " +
+            "The existing 640x1920 integrated scene remains the master and first build scene.");
+
+        if (!Application.isBatchMode)
+        {
+            EditorUtility.DisplayDialog(
+                "Boxing LED Size Variants",
+                "Created Main_LED_608x1080 and Main_LED_1920x1080 from the working " +
+                "Main_LED_640x1920 master scene.",
+                "OK");
+        }
+    }
+
+    [MenuItem("Tools/Toshiba LED/Validate Boxing Size Variants")]
+    public static void ValidateBoxingSizeVariants()
+    {
+        int failures = 0;
+        ValidateBoxingSizeVariant(
+            BoxingIntegratedScenePath,
+            TallDesignWidth,
+            TallDesignHeight,
+            TallRenderTexturePath,
+            ref failures);
+        ValidateBoxingSizeVariant(
+            Boxing608ScenePath,
+            DesignWidth,
+            DesignHeight,
+            RenderTexturePath,
+            ref failures);
+        ValidateBoxingSizeVariant(
+            BoxingNativeScenePath,
+            NativeDesignWidth,
+            NativeDesignHeight,
+            NativeRenderTexturePath,
+            ref failures);
+
+        if (failures == 0)
+        {
+            Debug.Log(
+                "Boxing LED size variant validation passed for 608x1080, 640x1920, and 1920x1080. " +
+                "Physical LED verification is still required on-site.");
+        }
+        else
+        {
+            Debug.LogError($"Boxing LED size variant validation found {failures} problem(s).");
+        }
+    }
+
+    private static void CreateBoxingSizeVariant(
+        string targetScenePath,
+        int designWidth,
+        int designHeight,
+        RenderTexture renderTexture,
+        Texture2D testBackground)
+    {
+        Scene masterScene = EditorSceneManager.OpenScene(BoxingIntegratedScenePath, OpenSceneMode.Single);
+        if (!EditorSceneManager.SaveScene(masterScene, targetScenePath, true))
+        {
+            throw new IOException($"Could not create the Boxing LED scene variant at {targetScenePath}.");
+        }
+
+        Scene variantScene = EditorSceneManager.OpenScene(targetScenePath, OpenSceneMode.Single);
+        GameObject cameraObject = FindRoot(variantScene, "Main Camera") ?? FindRoot(variantScene, "CaptureCamera");
+        Camera captureCamera = cameraObject != null ? cameraObject.GetComponent<Camera>() : null;
+        if (captureCamera == null)
+        {
+            throw new MissingComponentException($"No capture camera was found in {targetScenePath}.");
+        }
+
+        captureCamera.targetTexture = renderTexture;
+        captureCamera.aspect = (float)designWidth / designHeight;
+
+        GameObject captureCanvasObject = FindRoot(variantScene, "CaptureCanvas");
+        CanvasScaler captureScaler = captureCanvasObject != null
+            ? captureCanvasObject.GetComponent<CanvasScaler>()
+            : null;
+        if (captureScaler == null)
+        {
+            throw new MissingComponentException($"CaptureCanvas was not found in {targetScenePath}.");
+        }
+
+        captureScaler.referenceResolution = new Vector2(designWidth, designHeight);
+        Transform gameUI = captureCanvasObject.transform.Find("GameUI");
+        if (gameUI != null)
+        {
+            float xRatio = (float)designWidth / TallDesignWidth;
+            float yRatio = (float)designHeight / TallDesignHeight;
+            float uniformScale = Mathf.Min(xRatio, yRatio);
+            foreach (RectTransform child in gameUI.GetComponentsInChildren<RectTransform>(true))
+            {
+                if (child.parent != gameUI || child.name == "TestUI")
+                {
+                    continue;
+                }
+
+                Vector2 position = child.anchoredPosition;
+                child.anchoredPosition = new Vector2(position.x * xRatio, position.y * yRatio);
+                child.localScale = new Vector3(
+                    child.localScale.x * uniformScale,
+                    child.localScale.y * uniformScale,
+                    child.localScale.z);
+            }
+        }
+
+        Transform backgroundTransform = captureCanvasObject.transform.Find("Background");
+        RawImage background = backgroundTransform != null ? backgroundTransform.GetComponent<RawImage>() : null;
+        if (background != null && testBackground != null)
+        {
+            background.texture = testBackground;
+            float cropWidth = Mathf.Min(designWidth, testBackground.width);
+            float normalizedWidth = cropWidth / testBackground.width;
+            background.uvRect = new Rect((1f - normalizedWidth) * 0.5f, 0f, normalizedWidth, 1f);
+        }
+
+        GameObject outputCanvasObject = FindRoot(variantScene, "OutputCanvas");
+        Transform outputTransform = outputCanvasObject != null
+            ? outputCanvasObject.transform.Find("OutputRawImage")
+            : null;
+        RawImage outputImage = outputTransform != null ? outputTransform.GetComponent<RawImage>() : null;
+        if (outputImage == null)
+        {
+            throw new MissingComponentException($"OutputRawImage was not found in {targetScenePath}.");
+        }
+
+        outputImage.texture = renderTexture;
+        outputImage.uvRect = new Rect(0f, 0f, 1f, 1f);
+        StretchToParent(outputTransform as RectTransform);
+        EditorSceneManager.MarkSceneDirty(variantScene);
+        EditorSceneManager.SaveScene(variantScene, targetScenePath);
+        AddSceneToBuildSettings(targetScenePath);
+    }
+
+    private static void ValidateBoxingSizeVariant(
+        string scenePath,
+        int designWidth,
+        int designHeight,
+        string renderTexturePath,
+        ref int failures)
+    {
+        string resolution = $"{designWidth}x{designHeight}";
+        RenderTexture renderTexture = AssetDatabase.LoadAssetAtPath<RenderTexture>(renderTexturePath);
+        Check(
+            renderTexture != null && renderTexture.width == designWidth && renderTexture.height == designHeight,
+            $"Boxing {resolution} Render Texture is exact.",
+            ref failures);
+        Check(File.Exists(scenePath), $"Boxing {resolution} scene exists at {scenePath}.", ref failures);
+        if (!File.Exists(scenePath))
+        {
+            return;
+        }
+
+        Scene scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+        GameObject cameraObject = FindRoot(scene, "Main Camera") ?? FindRoot(scene, "CaptureCamera");
+        Camera camera = cameraObject != null ? cameraObject.GetComponent<Camera>() : null;
+        Check(
+            camera != null && camera.targetTexture == renderTexture,
+            $"Boxing {resolution} camera captures into the matching texture.",
+            ref failures);
+
+        GameObject captureCanvasObject = FindRoot(scene, "CaptureCanvas");
+        CanvasScaler scaler = captureCanvasObject != null ? captureCanvasObject.GetComponent<CanvasScaler>() : null;
+        Check(
+            scaler != null && scaler.referenceResolution == new Vector2(designWidth, designHeight),
+            $"Boxing {resolution} CaptureCanvas uses the matching reference resolution.",
+            ref failures);
+
+        Transform gameUI = captureCanvasObject != null ? captureCanvasObject.transform.Find("GameUI") : null;
+        Check(gameUI != null && gameUI.childCount > 0, $"Boxing {resolution} UI was recreated.", ref failures);
+
+        GameObject outputCanvasObject = FindRoot(scene, "OutputCanvas");
+        Transform outputTransform = outputCanvasObject != null
+            ? outputCanvasObject.transform.Find("OutputRawImage")
+            : null;
+        RawImage outputImage = outputTransform != null ? outputTransform.GetComponent<RawImage>() : null;
+        Check(
+            outputImage != null && outputImage.texture == renderTexture &&
+            outputTransform.GetComponent<AspectRatioFitter>() == null,
+            $"Boxing {resolution} output displays the complete frame without aspect preservation.",
+            ref failures);
     }
 
     private static Camera FindCameraInScene(Scene scene, string cameraName)

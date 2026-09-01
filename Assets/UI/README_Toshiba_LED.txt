@@ -14,6 +14,12 @@ Tools > Toshiba LED > Integrate Boxing Main Scene (640x1920)
 Then run:
 Tools > Toshiba LED > Apply Boxing Portrait UI Layout
 
+To create full Boxing game scenes with the same UI at every supported size, run:
+Tools > Toshiba LED > Recreate Boxing Game In All LED Sizes
+
+This creates Main_LED_608x1080.unity and Main_LED_1920x1080.unity while keeping
+Main_LED_640x1920.unity as the working master and first build scene.
+
 That command creates Assets/Scenes/Main_LED_640x1920.unity without modifying
 the original Assets/Scenes/Main.unity. It moves the existing Boxing UI into the
 capture stage, keeps UIManager references, and disables the old separate UI stretch.

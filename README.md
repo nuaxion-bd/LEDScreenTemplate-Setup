@@ -48,11 +48,11 @@ Complete scene and UI captured together
 
 ### Import the package into an existing Unity project
 
-Download [Toshiba_LED_Template_v6.unitypackage](Exports/Toshiba_LED_Template_v6.unitypackage) from this repository. In the destination Unity project:
+Download [Toshiba_LED_Template_v7.unitypackage](Exports/Toshiba_LED_Template_v7.unitypackage) from this repository. In the destination Unity project:
 
 1. Make a backup or Git commit of the project.
 2. Select **Assets > Import Package > Custom Package**.
-3. Select `Toshiba_LED_Template_v6.unitypackage`.
+3. Select `Toshiba_LED_Template_v7.unitypackage`.
 4. Leave all included files selected and choose **Import**.
 5. Wait for Unity to finish compiling.
 6. Select **Tools > Toshiba LED > Create Templates > Create All Templates**.
@@ -228,7 +228,7 @@ If you build `LEDTemplateTest_1920x1080.unity` instead, both the internal Render
 
 ## 9. Use the setup in the Boxing project
 
-The easiest method is to import `Exports/Toshiba_LED_Template_v6.unitypackage` using **Assets > Import Package > Custom Package**.
+The easiest method is to import `Exports/Toshiba_LED_Template_v7.unitypackage` using **Assets > Import Package > Custom Package**.
 
 Alternatively, make a backup or Git commit of the Boxing project, then copy these template files into its matching folders:
 
@@ -255,6 +255,17 @@ It does not overwrite the original `Assets/Scenes/Main.unity`. Open the new scen
 **Tools > Toshiba LED > Apply Boxing Portrait UI Layout**
 
 Test the integrated scene in Game mode at 1920 x 1080. Use the LED Preview window in **Design proportions** mode when repositioning portrait UI.
+
+To recreate the complete Boxing game and its connected UI at every supported internal size, select:
+
+**Tools > Toshiba LED > Recreate Boxing Game In All LED Sizes**
+
+This keeps `Main_LED_640x1920.unity` as the master and creates:
+
+- `Main_LED_608x1080.unity`
+- `Main_LED_1920x1080.unity`
+
+Validate them with **Tools > Toshiba LED > Validate Boxing Size Variants**.
 
 ## Troubleshooting
 
@@ -286,6 +297,6 @@ Move it under `CaptureCanvas > GameUI`. It must be captured by `CaptureCamera` b
 
 After changing the setup tool or included UI files, select:
 
-**Tools > Toshiba LED > Export Sharing Package (v6)**
+**Tools > Toshiba LED > Export Sharing Package (v7)**
 
-Unity recreates `Exports/Toshiba_LED_Template_v6.unitypackage` from the current source files.
+Unity recreates `Exports/Toshiba_LED_Template_v7.unitypackage` from the current source files.

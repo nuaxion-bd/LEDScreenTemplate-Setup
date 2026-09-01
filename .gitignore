@@ -83,6 +83,7 @@ mono_crash.*
 !/Exports/Toshiba_LED_Template_v4.unitypackage
 !/Exports/Toshiba_LED_Template_v5.unitypackage
 !/Exports/Toshiba_LED_Template_v6.unitypackage
+!/Exports/Toshiba_LED_Template_v7.unitypackage
 
 # Crashlytics generated file
 crashlytics-build.properties
