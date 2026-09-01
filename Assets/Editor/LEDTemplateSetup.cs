@@ -26,10 +26,10 @@ public static class LEDTemplateSetup
     public const string TestBackgroundPath = "Assets/UI/TestBackground.png";
     public const string BoxingSourceScenePath = "Assets/Scenes/Main.unity";
     public const string BoxingIntegratedScenePath = "Assets/Scenes/Main_LED_640x1920.unity";
-    public const string SharingPackagePath = "Exports/Toshiba_LED_Template_v5.unitypackage";
+    public const string SharingPackagePath = "Exports/Toshiba_LED_Template_v6.unitypackage";
     private const string BoxingLayoutRequestPath = "Temp/ToshibaApplyUILayout.request";
 
-    [MenuItem("Tools/Toshiba LED/Export Sharing Package (v5)")]
+    [MenuItem("Tools/Toshiba LED/Export Sharing Package (v6)")]
     public static void ExportSharingPackage()
     {
         string projectRoot = Directory.GetParent(Application.dataPath).FullName;
@@ -150,6 +150,12 @@ public static class LEDTemplateSetup
             NativeRenderTexturePath,
             "LED_Output_1920x1080",
             false);
+
+        if (File.Exists(BoxingIntegratedScenePath))
+        {
+            AddSceneToBuildSettings(BoxingIntegratedScenePath);
+            Debug.Log("Kept the integrated Boxing LED scene first in Build Profiles.");
+        }
 
         if (!Application.isBatchMode)
         {
