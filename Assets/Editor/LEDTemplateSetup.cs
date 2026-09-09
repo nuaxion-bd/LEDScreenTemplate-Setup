@@ -28,10 +28,10 @@ public static class LEDTemplateSetup
     public const string BoxingIntegratedScenePath = "Assets/Scenes/Main_LED_640x1920.unity";
     public const string Boxing608ScenePath = "Assets/Scenes/Main_LED_608x1080.unity";
     public const string BoxingNativeScenePath = "Assets/Scenes/Main_LED_1920x1080.unity";
-    public const string SharingPackagePath = "Exports/Toshiba_LED_Template_v7.unitypackage";
+    public const string SharingPackagePath = "Exports/Toshiba_LED_Template_v8.unitypackage";
     private const string BoxingLayoutRequestPath = "Temp/ToshibaApplyUILayout.request";
 
-    [MenuItem("Tools/Toshiba LED/Export Sharing Package (v7)")]
+    [MenuItem("Tools/Toshiba LED/Export Sharing Package (v8)")]
     public static void ExportSharingPackage()
     {
         string projectRoot = Directory.GetParent(Application.dataPath).FullName;
@@ -42,7 +42,8 @@ public static class LEDTemplateSetup
         {
             "Assets/Editor/LEDTemplateSetup.cs",
             "Assets/UI/TestBackground.png",
-            "Assets/UI/README_Toshiba_LED.txt"
+            "Assets/UI/README_Toshiba_LED.txt",
+            "Assets/UI/TUTORIAL_Toshiba_LED.txt"
         };
 
         foreach (string assetPath in packageAssets)

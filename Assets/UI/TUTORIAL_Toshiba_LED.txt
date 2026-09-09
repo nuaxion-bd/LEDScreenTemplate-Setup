@@ -1,0 +1,140 @@
+# Toshiba LED Screen: Beginner Tutorial
+
+Created by **BD and HKD**.
+
+This guide takes you from downloading the template to displaying your own content on the LED screen. Start with the included test picture, then replace it with your design.
+
+## 1. What is happening with the LED screen?
+
+Think of your content as a tall poster. You design the poster in its normal, tall shape. This setup then stretches that poster into a wide picture so it can travel through the configured 1920 x 1080 HDMI output.
+
+The LED controller is the hardware that takes the computer's picture and maps it onto the LED panels. With the matching Toshiba controller configuration, the wide picture is mapped back onto the tall display.
+
+```text
+Your tall design             Picture sent over HDMI       Physical LED display
+640 wide x 1920 high   -->    1920 wide x 1080 high   -->   Tall layout
+Normal design proportions    Looks wide and squashed       Matching controller mapping
+```
+
+For example, a circle in your portrait design becomes a wide oval in the HDMI picture. With the correct hardware mapping, it should look circular again on the LED display.
+
+**Design for the tall screen. Expect the computer's output to look stretched.** Do not squash your artwork yourself: the template performs the stretch on the completed picture, including its text and UI.
+
+There are two different sizes because they do different jobs:
+
+| Size | Purpose |
+| --- | --- |
+| **640 x 1920** | The recommended portrait design area in this project. Arrange your content here. |
+| **1920 x 1080** | The final picture the computer sends through HDMI. |
+
+These are the template's image sizes; they do not establish the physical panel's native pixel count. This project prepares the Unity picture. The LED controller must already be configured for the matching mapping, and the final result must be checked on the actual screen.
+
+## 2. Download and open the project
+
+You need Unity Hub, Unity Editor **6000.3.13f1**, and Windows build support for that editor. This repository is already set up as a Unity URP project.
+
+1. Open the [project repository](https://github.com/nuaxion-bd/LEDScreenTemplate-Setup).
+2. Select **Code > Download ZIP**.
+3. Extract the ZIP into a folder on your computer.
+4. Open **Unity Hub** and select **Add > Add project from disk**.
+5. Choose the extracted project folder containing `Assets`, `Packages`, and `ProjectSettings`.
+6. Open it with Unity **6000.3.13f1** and wait for importing and compilation to finish.
+
+If you already have a Unity project, use the package instructions in section 8 instead.
+
+## 3. Run the included test first
+
+1. In Unity, select **Tools > Toshiba LED > Create Templates > Create All Templates**.
+2. Select **Tools > Toshiba LED > Open 640x1920 Test Scene**.
+3. Open the **Game** tab and select **1920 x 1080** or **16:9** from its size menu.
+4. Press **Play**.
+
+The test picture should fill the Game view and look stretched horizontally. The text and background should stretch together. This is the picture intended for HDMI.
+
+Press **Play** again to stop before editing. Changes made during Play mode are normally lost when you stop.
+
+To see the original tall design, select **Tools > Toshiba LED > Open LED Preview**, choose **640x1920**, then choose **Design proportions**. Switch to **HDMI 1920x1080** to see the stretched version. Use **Auto refresh** or **Refresh capture** to update the preview.
+
+## 4. Understand the objects you will use
+
+| Object | Simple explanation |
+| --- | --- |
+| `CaptureCamera` | Takes the picture of the content visible to this camera. |
+| `CaptureCanvas` | Holds the UI that goes into that picture. |
+| `CaptureCanvas > Background` | Displays the included test background. |
+| `CaptureCanvas > GameUI` | The place for your own text, images, and other UI. |
+| `LED_Output_640x1920` | A Render Texture: a live image of the camera's view. |
+| `OutputCanvas > OutputRawImage` | Displays that live image stretched across the final output. |
+
+The camera captures the design first. The output image stretches the whole result, so the captured content stays together.
+
+## 5. Add your own content
+
+First, use **File > Save As** to save a working copy of the test scene, such as `Assets/Scenes/MyLEDContent.unity`. Work in that copy. Creating templates again can reset template settings and sample content.
+
+Try a simple title:
+
+1. In the **Hierarchy**, expand `CaptureCanvas` and select `GameUI`.
+2. Right-click `GameUI` and choose **UI > Text - TextMeshPro**. If prompted, import TMP Essentials.
+3. Confirm the new text object is a child of `GameUI`.
+4. In the **Inspector**, enter `HELLO LED`, set a visible text colour, and increase the font size.
+5. Give its Rect Transform a centred position and a size such as **560 wide x 200 high**.
+6. Open **LED Preview > 640x1920 > Design proportions** to check the title in the tall layout.
+7. Save your scene and test it in the Game view.
+
+For a full-screen poster:
+
+1. Prepare your artwork at **640 x 1920** with normal proportions.
+2. Drag the image file into `Assets/UI` in the Project window.
+3. Under `GameUI`, create **UI > Raw Image**.
+4. Assign your artwork to the Raw Image's **Texture** field.
+5. Set its Rect Transform anchors to stretch across its parent and set the left, right, top, and bottom offsets to **0**.
+6. Disable `CaptureCanvas > Background` to hide the supplied test picture. Disable `GameUI > TestUI` too if it is active.
+7. Save and check both preview modes.
+
+Keep your content under `CaptureCanvas > GameUI`. A separate Screen Space Overlay canvas bypasses the portrait capture. Reserve `OutputCanvas` for displaying the finished image, and leave `OutputRawImage` stretched to all four edges without an Aspect Ratio Fitter.
+
+The template handles display formatting. Importing it does not automatically adapt an existing game's cameras, layout, or input to the LED screen.
+
+## 6. Build and run on the LED computer
+
+1. Save and open your content scene.
+2. Select **File > Build Profiles** and choose **Windows**.
+3. Switch to Windows if needed and use **Intel 64-bit / x86-64**.
+4. In the scene list, enable your content scene and put it first. Disable sample scenes you do not need.
+5. Select **Build** and choose a folder outside `Assets`, such as `Builds/ToshibaLED`.
+6. Copy the **whole build folder** to the display computer, including the `.exe`, its data folder, and companion files.
+7. Connect the computer to the LED controller through the intended HDMI connection.
+8. Confirm the computer is sending **1920 x 1080** to that output and that the application is displayed on the LED-connected display.
+9. Run the `.exe` and inspect the actual LED screen.
+
+Check that all four edges are visible, text is readable, and circles look round. If the computer's HDMI picture is stretched but the physical LED still looks wrong, check the controller mapping and output configuration with the person responsible for the screen.
+
+## 7. Quick troubleshooting
+
+| What you see | What to check |
+| --- | --- |
+| The computer preview is wide and squashed | Expected for the portrait templates. Use **Design proportions** for editing. |
+| The physical LED is still distorted | Confirm the selected template, 1920 x 1080 HDMI signal, and controller mapping match the installation. |
+| There are black bars around the output | Check that `OutputRawImage` fills its parent with zero offsets and has no Aspect Ratio Fitter. |
+| Your text or image is missing | Check that it is active, visible, and under `CaptureCanvas > GameUI`. |
+| The Toshiba LED menu is missing | Wait for compilation, then check the Console for red errors and confirm `Assets/Editor/LEDTemplateSetup.cs` exists. |
+| The build opens the sample instead of your design | Put your saved content scene first in the enabled build scene list, then rebuild. |
+| Changes disappeared after testing | Stop Play mode before making edits, then save the scene. |
+
+For the generated test scenes, run **Tools > Toshiba LED > Validate Templates > Validate All Templates** and read the Console results. This checks the template setup in Unity; it does not check a custom scene copy or the physical LED controller.
+
+## 8. Use the template in an existing project
+
+1. Back up your existing project or commit its current state.
+2. Download [Toshiba_LED_Template_v8.unitypackage](https://github.com/nuaxion-bd/LEDScreenTemplate-Setup/blob/main/Exports/Toshiba_LED_Template_v8.unitypackage).
+3. In your Unity 6 URP project, select **Assets > Import Package > Custom Package**.
+4. Choose the downloaded package, leave the included files selected, and select **Import**.
+5. Wait for compilation, then run **Tools > Toshiba LED > Create Templates > Create All Templates**.
+6. Follow this guide from section 3 to test the template before adapting your content.
+
+The package includes the setup tool, test background, basic instructions, and this tutorial in `Assets/UI/TUTORIAL_Toshiba_LED.txt`. The menu command generates the template scenes and Render Textures. Keep this tutorial link alongside the package when sharing it.
+
+The project also includes a **608 x 1080** portrait template for the original setup and a **1920 x 1080** template for normal landscape output. Use the size that matches the installation; the landscape template has no intentional distortion.
+
+For the project-specific Boxing integration commands and additional technical details, see the [main README](https://github.com/nuaxion-bd/LEDScreenTemplate-Setup/blob/main/README.md).

@@ -1,6 +1,8 @@
 TOSHIBA LED TEMPLATE
 ====================
 
+Created by BD and HKD.
+
 Requirements:
 - Unity 6 Universal 3D (URP)
 - Unity UI (uGUI)
